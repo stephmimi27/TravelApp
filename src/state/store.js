@@ -22,7 +22,7 @@ async function openDB() {
     r.onsuccess = () => resolve(r.result);
     r.onerror = () => reject(r.error);
     r.onblocked = () =>
-      reject(new Error("Please close other Roam tabs and reload."));
+      reject(new Error("Please close other Air Time tabs and reload."));
   });
 }
 async function readDB() {

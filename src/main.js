@@ -33,7 +33,7 @@ function render() {
   if (page === "planner") renderPlanner(id);
   if (page === "passport") renderPassport();
   if (page === "trip") renderTrip(id);
-  document.title = `${{ world: "My trips", journal: "Travel journal", planner: "Trip planner", passport: "My passport", trip: tripById(id)?.name || "Travel journal" }[page]} · Roam`;
+  document.title = `${{ world: "My trips", journal: "Travel journal", planner: "Trip planner", passport: "My passport", trip: tripById(id)?.name || "Travel journal" }[page]} · Air Time`;
 }
 
 /* Start the app after every feature has loaded. */

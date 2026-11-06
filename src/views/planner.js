@@ -187,7 +187,7 @@ const Planner = (() => {
       link = document.createElement("a"),
       u = URL.createObjectURL(blob);
     link.href = u;
-    link.download = `roam-${name.replace(/[^a-z0-9-]/gi, "-")}.tsv`;
+    link.download = `air-time-${name.replace(/[^a-z0-9-]/gi, "-")}.tsv`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(u), 10000);
     toast(headers ? "Ready for Sheets — column headers are included." : "Ready for Sheets — rows are exported without headers.");

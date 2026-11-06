@@ -5,7 +5,7 @@
 function settings() {
   showModal(
     "Settings & backups",
-    `<div class="settings-action"><div><h3>Export backup</h3><p>Download every trip, memory, photo, and plan as a backup.</p></div>${button("Export", "export", "download", "", "btn-small")}</div><div class="settings-action"><div><h3>Restore backup</h3><p>Restore a Roam backup. You’ll choose before replacing anything.</p></div>${button("Import", "import-backup", "upload", "", "btn-small")}</div><div class="settings-action"><div><h3>Instagram Stories</h3><p>Bring saved Instagram Stories into your travel journal.</p></div>${button("Import Stories", "import-stories", "instagram", "", "btn-small")}</div><div class="settings-action"><div><h3>Sample trips</h3><p>Remove example trips and keep every trip you added yourself.</p></div>${button("Clear samples", "clear-demo", "trash", "", "btn-small")}</div><div class="storage-note">${ico("lock", 14)} Your journal is saved in this browser on this device. Export a backup to move it to another device. Clearing browser data removes your saved journal. Photo and Story imports stay on your device.</div>`,
+    `<div class="settings-action"><div><h3>Export backup</h3><p>Download every trip, memory, photo, and plan as a backup.</p></div>${button("Export", "export", "download", "", "btn-small")}</div><div class="settings-action"><div><h3>Restore backup</h3><p>Restore a Air Time backup. You’ll choose before replacing anything.</p></div>${button("Import", "import-backup", "upload", "", "btn-small")}</div><div class="settings-action"><div><h3>Instagram Stories</h3><p>Bring saved Instagram Stories into your travel journal.</p></div>${button("Import Stories", "import-stories", "instagram", "", "btn-small")}</div><div class="settings-action"><div><h3>Sample trips</h3><p>Remove example trips and keep every trip you added yourself.</p></div>${button("Clear samples", "clear-demo", "trash", "", "btn-small")}</div><div class="storage-note">${ico("lock", 14)} Your journal is saved in this browser on this device. Export a backup to move it to another device. Clearing browser data removes your saved journal. Photo and Story imports stay on your device.</div>`,
     `<button class="btn btn-primary" data-action="close-modal">Done</button>`,
   );
 }
@@ -17,7 +17,7 @@ function validateBackup(raw) {
     !Array.isArray(raw.trips) ||
     raw.trips.length > 300
   )
-    throw new Error("This isn’t a supported Roam backup.");
+    throw new Error("This isn’t a supported Air Time backup.");
   const str = (v, n = 8000) => (typeof v === "string" ? v.slice(0, n) : "");
   const date = (v) => {
     const d = str(v, 10);
@@ -140,7 +140,7 @@ $("#import-file").addEventListener("change", async (e) => {
   if (!file) return;
   try {
     if (file.size > 200 * 1024 * 1024)
-      throw new Error("Choose a Roam backup under 200 MB.");
+      throw new Error("Choose a Air Time backup under 200 MB.");
     pendingBackup = validateBackup(JSON.parse(await file.text()));
     showModal(
       "Restore backup?",
@@ -149,7 +149,7 @@ $("#import-file").addEventListener("change", async (e) => {
     );
   } catch (err) {
     toast(
-      err.message || "That file couldn’t be read. Choose a Roam JSON backup.",
+      err.message || "That file couldn’t be read. Choose a Air Time JSON backup.",
     );
   }
 });

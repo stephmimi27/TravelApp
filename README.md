@@ -1,4 +1,4 @@
-# TravelApp · Roam
+# TravelApp · Air Time
 
 A pixel-art travel planner and journal, organized as an editable project for GitHub, Codex, and Vercel.
 

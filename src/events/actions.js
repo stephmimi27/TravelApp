@@ -240,7 +240,7 @@ document.addEventListener("click", async (e) => {
       const url = URL.createObjectURL(blob),
         a = document.createElement("a");
       a.href = url;
-      a.download = `roam-journal-${today()}.json`;
+      a.download = `air-time-journal-${today()}.json`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 10000);
       toast("Backup ready.");
