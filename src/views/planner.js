@@ -139,7 +139,7 @@ const Planner = (() => {
   function pasteForm(t) {
     showModal(
       "Import from Sheets",
-      `<p>Copy your rows from a spreadsheet and paste them below. Your row order, notes, and links stay together.</p><div class="form-field"><label for="paste-layout">Column order</label><select id="paste-layout" name="layout"><option value="hk">Name · Cost · Hours · Location · Notes</option><option value="activities">Name · Category · Location · Hours · Cost · Website · Notes · (blank) · Map</option></select></div><div class="form-field" style="margin-top:17px"><label for="paste-data">Your copied rows</label><textarea id="paste-data" name="rows" required maxlength="1000000" style="min-height:190px" placeholder="Paste a table from Sheets here…"></textarea><span class="field-hint">Headers are optional. Import up to 500 rows at a time. You can add a district after importing.</span></div>`,
+      `<p>Copy your rows from a spreadsheet and paste them below. Your row order, notes, and links stay together.</p><div class="form-field"><span>Column order</span><p id="paste-layout" class="field-hint">Name · Category · Map · Hours · Cost · Website · Notes</p></div><div class="form-field" style="margin-top:17px"><label for="paste-data">Your copied rows</label><textarea id="paste-data" name="rows" required maxlength="1000000" style="min-height:190px" placeholder="Paste a table from Sheets here…"></textarea><span class="field-hint">Headers are optional. Import up to 500 rows at a time. You can add a district after importing.</span></div>`,
       `<button class="btn" type="button" data-action="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Save these places</button>`,
       "paste-places-form",
     );
@@ -170,7 +170,7 @@ const Planner = (() => {
     if (row.some((c) => c.trim())) rows.push(row);
     return rows;
   }
-  function downloadRows(rows, name) {
+  function downloadRows(rows, name, headers) {
     if (!rows.length) {
       toast("There’s nothing to export yet.");
       return;
@@ -179,8 +179,9 @@ const Planner = (() => {
       const s = String(v ?? "");
       return /[\t\n\r"]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
+    const output = headers ? [headers, ...rows] : rows;
     const blob = new Blob(
-        ["\ufeff" + rows.map((r) => r.map(quote).join("\t")).join("\r\n")],
+        ["\ufeff" + output.map((r) => r.map(quote).join("\t")).join("\r\n")],
         { type: "text/tab-separated-values;charset=utf-8" },
       ),
       link = document.createElement("a"),
@@ -189,7 +190,7 @@ const Planner = (() => {
     link.download = `roam-${name.replace(/[^a-z0-9-]/gi, "-")}.tsv`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(u), 10000);
-    toast("Ready for Sheets — rows are exported without headers.");
+    toast(headers ? "Ready for Sheets — column headers are included." : "Ready for Sheets — rows are exported without headers.");
   }
   async function action(a, { target, t, tid, id }) {
     if (a === "planner-tab") {
@@ -244,17 +245,15 @@ const Planner = (() => {
       downloadRows(
         (t.places || []).map((p) => [
           p.name,
-          p.cost,
-          p.hours,
-          p.location,
-          p.note,
           p.category,
-          p.district,
-          p.website,
           p.mapLink,
-          p.access,
+          p.hours,
+          p.cost,
+          p.website,
+          p.note,
         ]),
         `${t.name}-places`,
+        ["Name", "Category", "Map", "Hours", "Cost", "Website", "Notes"],
       );
       return true;
     }
@@ -366,19 +365,18 @@ const Planner = (() => {
       const first = rows[0] || [];
       if (/^(name|attraction|place)(\s|$)/i.test(first[0]?.trim() || ""))
         rows.shift();
-      const activity = fd.get("layout") === "activities";
       const places = rows
         .filter((r) => r[0]?.trim())
         .map((r) => ({
           id: uid(),
           name: r[0].trim().slice(0, 160),
-          category: activity ? r[1]?.trim() || "Activities" : "Activities",
-          location: r[activity ? 2 : 3]?.trim() || "",
-          hours: r[activity ? 3 : 2]?.trim() || "",
-          cost: r[activity ? 4 : 1]?.trim() || "",
-          website: activity ? r[5]?.trim() || "" : "",
-          note: r[activity ? 6 : 4]?.trim() || "",
-          mapLink: activity ? r[8]?.trim() || "" : "",
+          category: r[1]?.trim() || "Activities",
+          location: "",
+          hours: r[3]?.trim() || "",
+          cost: r[4]?.trim() || "",
+          website: r[5]?.trim() || "",
+          note: r[6]?.trim() || "",
+          mapLink: r[2]?.trim() || "",
           district: "",
           access: "",
         }));

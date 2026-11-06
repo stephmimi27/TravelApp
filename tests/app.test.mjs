@@ -96,10 +96,9 @@ context.pasteForm = {
   dataset: { trip: "demo-kyoto" },
 };
 context.pasteData = new Map([
-  ["layout", "hk"],
   [
     "rows",
-    'Attraction\tCost\tHours\tLocation\tNotes\nLittle museum\tFree\t10–5\t4 River Road\t"First line\nSecond line"',
+    'Name\tCategory\tMap\tHours\tCost\tWebsite\tNotes\nLittle museum\tCulture\thttps://maps.example.com/museum\t10–5\tFree\thttps://example.com/museum\t"First line\nSecond line"',
   ],
 ]);
 await run("Planner.submit(pasteForm,pasteData)");
@@ -107,6 +106,24 @@ assert.equal(
   run("tripById('demo-kyoto').places.at(-1).note"),
   "First line\nSecond line",
 );
+assert.equal(run("tripById('demo-kyoto').places.at(-1).category"), "Culture");
+assert.equal(run("tripById('demo-kyoto').places.at(-1).mapLink"), "https://maps.example.com/museum");
+assert.equal(run("tripById('demo-kyoto').places.at(-1).hours"), "10–5");
+assert.equal(run("tripById('demo-kyoto').places.at(-1).cost"), "Free");
+assert.equal(run("tripById('demo-kyoto').places.at(-1).website"), "https://example.com/museum");
+// Verify the downloaded TSV can be pasted back into the same seven columns.
+let exportedPlaces;
+const originalCreateObjectURL = URL.createObjectURL;
+URL.createObjectURL = (blob) => { exportedPlaces = blob; return "blob:test-export"; };
+document.createElement = () => ({ click() {} });
+try {
+  await run("Planner.action('export-places',{t:tripById('demo-kyoto')})");
+} finally {
+  URL.createObjectURL = originalCreateObjectURL;
+}
+const exportedText = await exportedPlaces.text();
+assert.ok(exportedText.startsWith("Name\tCategory\tMap\tHours\tCost\tWebsite\tNotes\r\n"));
+assert.ok(exportedText.includes('Little museum\tCulture\thttps://maps.example.com/museum\t10–5\tFree\thttps://example.com/museum\t"First line\nSecond line"'));
 context.expenseForm = {
   id: "tracked-expense-form",
   dataset: { trip: "demo-kyoto" },
