@@ -528,5 +528,15 @@ const Art = (() => {
     s += `<g fill="none" stroke="#f6f9ed" stroke-width=".65" stroke-dasharray="2 3"><path d="M66 39 Q166 -4 294 64"/><path d="M106 44 Q182 95 294 64"/></g>`;
     return svg(s, "0 0 360 180", "world-canvas");
   }
-  return { scene, icon, backpack, avatar, pin, world };
+  function paperPlane() {
+    return svg(
+      '<path fill="#285b8f" d="M2 10h4V8h4V6h4V4h8v8h-2v4h-2v4h-4v-2h-2v-4H8v-2H2z"/>' +
+      '<path fill="#e2effb" d="M6 10h4V8h4V6h6v2h-4v2h-4v2H8v-2z"/>' +
+      '<path fill="#90bce6" d="M14 12h2v-2h2V8h2v4h-2v4h-2v2h-2z"/>' +
+      '<path fill="#5087bb" d="M10 12h4v2h-2v4h-2z"/>',
+      "0 0 24 24",
+      "paper-plane-logo",
+    );
+  }
+  return { scene, icon, backpack, paperPlane, avatar, pin, world };
 })();

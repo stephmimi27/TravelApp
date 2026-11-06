@@ -37,7 +37,7 @@ function render() {
 }
 
 /* Start the app after every feature has loaded. */
-$("#brand-icon").innerHTML = Art.backpack();
+$("#brand-icon").innerHTML = Art.paperPlane();
 $("#open-settings").innerHTML = ico("settings", 17);
 $("#open-settings").addEventListener("click", settings);
 $("#open-passport").innerHTML = Art.avatar();
