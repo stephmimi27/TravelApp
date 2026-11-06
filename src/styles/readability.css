@@ -1,0 +1,26 @@
+/* Readable ink for journal content, with softer color reserved for decoration. */
+.hero-sub,
+.panel-heading p,
+.map-legend,
+.trip-card-body p,
+.memory-card p {
+  color: #817785;
+}
+.trip-card-body .location,
+.trip-card-meta,
+.trip-date,
+.memory-footer {
+  color: #8b7c91;
+}
+.itinerary-info p,
+.check-item,
+.budget-status,
+.expense-row {
+  color: #8b7697;
+}
+label,
+.field-hint,
+.settings-action p,
+.import-help p {
+  color: #8e779b;
+}

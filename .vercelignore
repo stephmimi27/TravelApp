@@ -1,0 +1,7 @@
+.git
+.openai
+.vercel
+scripts/build-font.py
+*.zip
+*.tar.gz
+__pycache__

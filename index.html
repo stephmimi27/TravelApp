@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f8f5ee" />
+    <meta
+      name="description"
+      content="A pixel-art travel planner and journal with saved places, a drag-and-drop itinerary calendar, and trip memories."
+    />
+    <title>Roam · Travel planner & journal</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="src/styles/global.css" />
+    <link rel="stylesheet" href="src/styles/planner.css" />
+    <link rel="stylesheet" href="src/styles/readability.css" />
+    <link rel="stylesheet" href="src/styles/calendar.css" />
+    <link rel="stylesheet" href="src/styles/saved-places.css" />
+    <script src="src/lib/dom.js" defer></script>
+    <script src="src/lib/dates.js" defer></script>
+    <script src="src/data/destinations.js" defer></script>
+    <script src="src/data/sample-trips.js" defer></script>
+    <script src="src/state/store.js" defer></script>
+    <script src="src/components/ui.js" defer></script>
+    <script src="src/components/pixel-art.js" defer></script>
+    <script src="src/components/trip-card.js" defer></script>
+    <script src="src/components/memory-card.js" defer></script>
+    <script src="src/lib/media.js" defer></script>
+    <script src="src/components/saved-places.js" defer></script>
+    <script src="src/components/calendar.js" defer></script>
+    <script src="src/views/planner.js" defer></script>
+    <script src="src/views/my-trips.js" defer></script>
+    <script src="src/views/journal.js" defer></script>
+    <script src="src/views/trip-details.js" defer></script>
+    <script src="src/views/passport.js" defer></script>
+    <script src="src/forms/trip-form.js" defer></script>
+    <script src="src/forms/memory-form.js" defer></script>
+    <script src="src/forms/itinerary-form.js" defer></script>
+    <script src="src/features/backups.js" defer></script>
+    <script src="src/features/stories.js" defer></script>
+    <script src="src/events/actions.js" defer></script>
+    <script src="src/events/filters.js" defer></script>
+    <script src="src/events/forms.js" defer></script>
+    <script src="src/main.js" defer></script>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#world" aria-label="Roam home"
+          ><span class="brand-icon" id="brand-icon"></span
+          ><span>roam<span class="brand-dot">.</span></span></a
+        >
+        <nav aria-label="Main navigation" id="navigation"></nav>
+        <div class="header-actions">
+          <span class="save-indicator"><i></i> All changes saved</span
+          ><button
+            class="icon-btn"
+            id="open-settings"
+            aria-label="Backups and settings"
+          ></button
+          ><button
+            class="avatar"
+            id="open-passport"
+            aria-label="Open my passport"
+          ></button>
+        </div>
+      </div>
+    </header>
+    <main id="main" tabindex="-1">
+      <div class="loading-state">Loading trips…</div>
+    </main>
+    <footer class="site-footer">
+      <span
+        ><span class="tiny-sparkle">✦</span> Travel journal & trip planner</span
+      ><span>Roam <span class="footer-heart">♥</span></span>
+    </footer>
+    <dialog id="modal" aria-labelledby="modal-title">
+      <div id="modal-content"></div>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <input
+      id="import-file"
+      type="file"
+      accept="application/json,.json"
+      hidden
+    />
+  </body>
+</html>

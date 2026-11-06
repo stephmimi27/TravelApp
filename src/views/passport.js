@@ -1,0 +1,9 @@
+"use strict";
+
+/* Visited destinations and wishlist. */
+
+function renderPassport() {
+  const visited = state.trips.filter((t) => t.status === "visited"),
+    wishlist = state.trips.filter((t) => t.status === "wishlist");
+  main.innerHTML = `<div class="passport-cover"><div><div class="eyebrow">VISITED PLACES</div><h1>Travel passport</h1><p>A record of the places you’ve visited.</p><p style="margin-top:16px">${visited.length} trips · ${new Set(visited.map((t) => t.country.toLowerCase()).filter(Boolean)).size} countries</p></div><div class="passport-book">ROAM ${ico("globe", 48)} TRAVEL<br>PASSPORT</div></div><div class="section-title"><div><h2>Visited destinations</h2><p>Open a destination to see its trip details.</p></div>${button("Add a trip", "add-trip", "plus", "", "btn-small")}</div>${visited.length ? `<div class="passport-stamps">${visited.map((t) => `<a href="#trip/${esc(t.id)}" class="stamp">${ico(t.scene === "mountains" ? "compass" : t.scene === "coast" ? "plane" : "globe", 42)}<h3>${esc(t.name)}</h3><p>${esc(t.country.toUpperCase())}</p><p style="margin-top:12px">${t.start ? fmtDate(t.start, { month: "short", year: "numeric" }).toUpperCase() : "PAST TRIP"}${t.demo ? " · SAMPLE" : ""}</p></a>`).join("")}</div>` : empty("No visited destinations yet", "Add a past trip to list it here.", "add-trip")}<div class="section-title"><div><h2>Wishlist</h2><p>Destinations you’d like to visit.</p></div>${button("Add a destination", "add-trip", "plus", 'data-status="wishlist"', "btn-small")}</div>${wishlist.map((t) => `<div class="wishlist-row"><div class="list-scene">${Art.scene(t.scene)}</div><div><h3>${esc(t.name)}</h3><p>${esc(t.country)}${t.demo ? " · SAMPLE" : ""}</p></div>${button("View plans", "open-trip", "arrow", `data-trip="${esc(t.id)}"`, "btn-small")}</div>`).join("") || '<p class="field-hint">Add a destination to your wishlist.</p>'}${demoNotice()}`;
+}
