@@ -2,7 +2,10 @@
 
 A pixel-art travel planner and journal, organized as an editable project for GitHub, Codex, and Vercel.
 
-## Run in Codex or locally
+## Website hosted on Vercel
+https://stephanie-portfolio-swart.vercel.app/
+
+## Run in Codex or locally 
 
 Use Node.js 20 or later. There are no runtime dependencies.
 
@@ -44,20 +47,11 @@ npm run build
 
 `index.html` contains the app shell and links to source files. The application is plain JavaScript; its ordered deferred scripts share existing bindings. Keep `src/main.js` last. `AGENTS.md` gives Codex the project map and development rules.
 
-## Host on Vercel
-
-Upload or push this entire project to `stephmimi27/TravelApp`, including `src/`, `public/`, `scripts/`, `tests/`, `package.json`, `package-lock.json`, and `vercel.json`. Import that repository as a Vercel project. Use the repository root as the Root Directory.
-
-The included `vercel.json` selects the Other framework preset, runs syntax and application checks, builds the site, and publishes `dist/`. No environment variables or API keys are needed. Future deployments should use the same production website address to retain that browser's journal.
-
 ## How your travel data is saved
 
 Trips, photos, videos, saved places, plans, and notes are saved in IndexedDB in the browser you are using. Editing the website's code or deploying it to Vercel does not put that journal into GitHub or into a cloud database.
 
-Closing the tab or browser normally keeps your data. Reopening the same website address in the same browser brings it back. Clearing site storage, using a private/incognito session, or browser storage eviction can remove it. Export backups for a separate copy.
-
-A new Vercel address has separate browser storage from the current Roam address. Before switching, open Settings & backups on the old site and export your backup; import it on the new site. Another browser or device has a separate journal. This version has no account, server database, or cross-device sync.
-
+Closing the tab or browser keeps your data. Reopening the same website address in the same browser brings it back. Clearing site storage, using a private/incognito session, or browser storage eviction can remove it. Export backups for a separate copy.
 The original database name, object-store key, and backup format are preserved in this source reorganization. Personal journal records are never included in this repository. Files under `src/data/` contain fictional examples and offline destination suggestions only.
 
 ## Features
@@ -71,6 +65,3 @@ The original database name, object-store key, and backup format are preserved in
 - Versioned JSON backup and restore, including media.
 - Import saved Instagram Story files or an Instagram JSON export. This is file-based import; there is no live Instagram connection.
 
-## Optional font regeneration
-
-The original font is already included. To regenerate it, install Python fontTools and run `python3 scripts/build-font.py`. It writes to `public/assets/roam-pixel.woff`.
