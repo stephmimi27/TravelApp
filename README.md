@@ -2,8 +2,7 @@
 
 A pixel-art travel planner and journal, organized as an editable project for GitHub, Codex, and Vercel.
 
-## Website hosted on Vercel
-https://stephanie-portfolio-swart.vercel.app/
+https://travel-roaming.vercel.app
 
 ## Run in Codex or locally 
 
