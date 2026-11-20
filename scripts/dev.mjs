@@ -2,8 +2,10 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { sharedPlansConfig, supabaseBundle } from "./shared-plans-config.mjs";
 
 const root = path.resolve(fileURLToPath(new URL("../", import.meta.url)));
+const sharing = sharedPlansConfig();
 const option = (name) => {
   const index = process.argv.indexOf(name);
   return index < 0 ? undefined : process.argv[index + 1];
@@ -34,6 +36,17 @@ createServer(async (request, response) => {
     const pathname = decodeURIComponent(
       new URL(request.url, "http://localhost").pathname,
     );
+    if (pathname === "/assets/shared-plans-config.json") {
+      response.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+      response.end(request.method === "HEAD" ? undefined : JSON.stringify(sharing));
+      return;
+    }
+    if (pathname === "/assets/supabase.js" && sharing.url) {
+      const bundle = await readFile(supabaseBundle);
+      response.writeHead(200, { "Content-Type": "text/javascript", "Cache-Control": "no-store" });
+      response.end(request.method === "HEAD" ? undefined : bundle);
+      return;
+    }
     let directory, relative;
     if (pathname === "/" || pathname === "/index.html") {
       directory = root;

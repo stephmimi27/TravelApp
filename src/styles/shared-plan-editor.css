@@ -1,0 +1,86 @@
+dialog:has(#shared-plan-edit-form) {
+  max-width: 690px;
+}
+
+#shared-plan-edit-form {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  max-height: 90dvh;
+}
+
+#shared-plan-edit-form .modal-body {
+  min-height: 0;
+}
+
+#shared-plan-edit-form .modal-header,
+#shared-plan-edit-form .modal-footer {
+  flex-shrink: 0;
+}
+
+.shared-edit-fields {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.shared-edit-section,
+.shared-edit-row {
+  min-width: 0;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.shared-edit-section > summary,
+.shared-edit-row > summary {
+  color: var(--dark-blue);
+  cursor: pointer;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.shared-edit-row {
+  background: #fcfaf5;
+}
+
+.shared-edit-section > .form-grid,
+.shared-edit-items,
+.shared-edit-row-body {
+  margin-top: 12px;
+}
+
+.shared-edit-items {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.shared-edit-row-body > .btn {
+  margin-top: 12px;
+}
+
+.shared-edit-check {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+}
+
+.shared-edit-status {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.shared-edit-status:empty {
+  display: none;
+}
+
+@media (max-width: 420px) {
+  .shared-edit-fields .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

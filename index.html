@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="src/styles/readability.css" />
     <link rel="stylesheet" href="src/styles/calendar.css" />
     <link rel="stylesheet" href="src/styles/saved-places.css" />
+    <link rel="stylesheet" href="src/styles/shared-plans.css" />
     <script src="src/lib/dom.js" defer></script>
     <script src="src/lib/dates.js" defer></script>
     <script src="src/data/destinations.js" defer></script>
@@ -37,6 +38,9 @@
     <script src="src/forms/itinerary-form.js" defer></script>
     <script src="src/features/backups.js" defer></script>
     <script src="src/features/stories.js" defer></script>
+    <script src="src/features/shared-plan-data.js" defer></script>
+    <script src="src/features/shared-plans.js" defer></script>
+    <script src="src/features/shared-plans-ui.js" defer></script>
     <script src="src/events/actions.js" defer></script>
     <script src="src/events/filters.js" defer></script>
     <script src="src/events/forms.js" defer></script>
@@ -53,7 +57,7 @@
         <nav aria-label="Main navigation" id="navigation"></nav>
         <div class="header-actions">
           <span class="save-indicator"><i></i> All changes saved</span
-          ><button
+          ><button class="btn btn-small" id="open-account" type="button">Account</button><button
             class="icon-btn"
             id="open-settings"
             aria-label="Backups and settings"

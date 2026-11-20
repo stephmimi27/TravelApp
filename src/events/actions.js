@@ -25,6 +25,9 @@ document.addEventListener("click", async (e) => {
     case "edit-trip":
       openTripForm(tid);
       break;
+    case "share-plan":
+      if (t) SharedPlansUI.openShare(t);
+      break;
     case "open-trip":
       if (t)
         navigate(t.status === "visited" ? `#trip/${t.id}` : `#planner/${t.id}`);

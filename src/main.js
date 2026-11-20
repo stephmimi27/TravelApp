@@ -11,7 +11,7 @@ function render() {
   TripCalendar.capture();
   TripCalendar.cancelDrag();
   const [route = "world", id = ""] = location.hash.slice(1).split("/");
-  const page = ["world", "journal", "planner", "passport", "trip"].includes(
+  const page = ["world", "journal", "planner", "passport", "trip", "shared"].includes(
     route,
   )
     ? route
@@ -33,7 +33,8 @@ function render() {
   if (page === "planner") renderPlanner(id);
   if (page === "passport") renderPassport();
   if (page === "trip") renderTrip(id);
-  document.title = `${{ world: "My trips", journal: "Travel journal", planner: "Trip planner", passport: "My passport", trip: tripById(id)?.name || "Travel journal" }[page]} · Air Time`;
+  if (page === "shared") SharedPlansUI.render(id);
+  document.title = `${{ world: "My trips", journal: "Travel journal", planner: "Trip planner", passport: "My passport", trip: tripById(id)?.name || "Travel journal", shared: "Shared plans" }[page]} · Air Time`;
 }
 
 /* Start the app after every feature has loaded. */
@@ -42,6 +43,7 @@ $("#open-settings").innerHTML = ico("settings", 17);
 $("#open-settings").addEventListener("click", settings);
 $("#open-passport").innerHTML = Art.avatar();
 $("#open-passport").addEventListener("click", () => navigate("#passport"));
+SharedPlansUI.start();
 modal.addEventListener("click", (e) => {
   if (e.target === modal) {
     const r = modal.getBoundingClientRect();

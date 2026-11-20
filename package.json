@@ -10,7 +10,10 @@
     "dev": "node scripts/dev.mjs",
     "start": "npm run dev",
     "check": "node scripts/check.mjs",
-    "test": "node tests/app.test.mjs",
+    "test": "node tests/app.test.mjs && node tests/shared-plan-data.test.mjs",
     "build": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "2.109.0"
   }
 }

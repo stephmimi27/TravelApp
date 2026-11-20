@@ -1,0 +1,272 @@
+#open-account {
+  color: var(--dark-blue);
+  white-space: nowrap;
+}
+
+.planner-calendar-layout .plan-header-text:has(.plan-header-actions) {
+  position: relative;
+  min-height: 89px;
+  padding-right: 211px;
+}
+
+.planner-calendar-layout .plan-header:has(.plan-header-actions) {
+  height: auto;
+}
+
+.plan-header-actions,
+.shared-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.planner-calendar-layout .plan-header-actions {
+  position: absolute;
+  top: 26px;
+  right: 20px;
+}
+
+.planner-calendar-layout .plan-header-actions .btn {
+  position: static;
+}
+
+.trip-hero-details .hero-actions:has([data-action="share-plan"]) {
+  flex-wrap: wrap;
+}
+
+.shared-view {
+  width: min(100%, 940px);
+  margin: 0 auto;
+  overflow-wrap: anywhere;
+}
+
+.shared-view > .section-title {
+  align-items: center;
+  margin: 0 0 22px;
+}
+
+.shared-plan-list,
+.shared-plan-rows,
+.shared-invites {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.shared-plan-list {
+  display: grid;
+  gap: 12px;
+}
+
+.shared-plan-list-item {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.shared-plan-list-item h2 {
+  margin-bottom: 4px;
+}
+
+.shared-plan-list-item .muted,
+.shared-plan-hero .muted {
+  font-size: 12px;
+}
+
+.shared-plan-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  align-items: center;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.shared-plan-art {
+  position: relative;
+  align-self: stretch;
+  min-height: 154px;
+}
+
+.shared-plan-art .pixel-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shared-plan-hero > :last-child {
+  padding: 21px;
+}
+
+.shared-plan-hero h2 {
+  margin: 7px 0;
+  font-size: clamp(25px, 5vw, 38px);
+}
+
+.shared-section {
+  padding: 20px;
+  margin-top: 14px;
+}
+
+.shared-section h2 {
+  margin-bottom: 12px;
+}
+
+.shared-plan-rows > li {
+  padding: 11px 0;
+  border-top: 1px solid var(--border);
+}
+
+.shared-plan-rows h3 {
+  font-size: 15px;
+  margin-bottom: 3px;
+}
+
+.shared-places {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+}
+
+.shared-facts {
+  display: grid;
+  gap: 3px;
+  margin: 8px 0 2px;
+  font-size: 12px;
+}
+
+.shared-facts > div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 5px;
+}
+
+.shared-facts dt,
+.shared-facts dd {
+  margin: 0;
+}
+
+.shared-facts dt {
+  color: var(--dark-blue);
+  font-weight: 600;
+}
+
+.shared-note {
+  margin: 6px 0;
+  white-space: pre-wrap;
+}
+
+.shared-check {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.shared-check svg {
+  color: var(--green);
+}
+
+.shared-form,
+.shared-status,
+.shared-email {
+  overflow-wrap: anywhere;
+}
+
+.shared-form {
+  display: grid;
+  gap: 13px;
+}
+
+.shared-link-fallback {
+  margin: 8px 0;
+}
+
+.shared-section > .shared-actions {
+  margin: 10px 0;
+}
+
+.shared-invites {
+  display: grid;
+  gap: 3px;
+}
+
+.shared-invites > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-top: 1px solid var(--border);
+}
+
+.shared-status {
+  color: var(--dark-blue);
+  margin-top: 8px;
+}
+
+.shared-status:empty {
+  margin: 0;
+}
+
+@media (max-width: 1300px) {
+  .header-inner:has(#open-account) {
+    column-gap: 36px;
+  }
+
+  .header-inner:has(#open-account) .header-actions {
+    gap: 9px;
+  }
+}
+
+@media (min-width: 651px) and (max-width: 800px) {
+  .header-inner:has(#open-account) {
+    column-gap: 19px;
+    padding-inline: 18px;
+  }
+
+  .header-inner:has(#open-account) nav {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 650px) {
+  .header-inner:has(#open-account) {
+    column-gap: 12px;
+  }
+
+  #open-account {
+    padding-inline: 7px;
+  }
+
+  .planner-calendar-layout .plan-header-text:has(.plan-header-actions) {
+    padding-right: 16px;
+  }
+
+  .planner-calendar-layout .plan-header-actions {
+    position: static;
+    margin-top: 9px;
+  }
+
+  .shared-plan-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .shared-plan-art {
+    min-height: 115px;
+  }
+
+  .shared-places {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 370px) {
+  .shared-plan-list-item {
+    flex-wrap: wrap;
+  }
+}
