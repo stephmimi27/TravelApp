@@ -135,6 +135,13 @@ begin
     end if;
   end if;
 
+  if jsonb_typeof(p_plan) = 'object' and (
+    jsonb_typeof(p_plan->'name') is distinct from 'string'
+    or p_plan->>'name' !~ '[^[:space:]]'
+  ) then
+    raise check_violation using constraint = 'roam_shared_plan_name', message = 'A shared plan needs a destination.';
+  end if;
+
   update public.roam_shared_plans set plan = p_plan
   where id = p_plan_id and revision = p_revision
   returning revision into next_revision;

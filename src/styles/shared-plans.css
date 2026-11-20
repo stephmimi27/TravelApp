@@ -107,6 +107,10 @@
   font-size: clamp(25px, 5vw, 38px);
 }
 
+.shared-plan-hero .shared-actions {
+  margin-top: 12px;
+}
+
 .shared-section {
   padding: 20px;
   margin-top: 14px;
@@ -262,6 +266,10 @@
 
   .shared-places {
     grid-template-columns: 1fr;
+  }
+
+  .shared-invites > li {
+    flex-wrap: wrap;
   }
 }
 

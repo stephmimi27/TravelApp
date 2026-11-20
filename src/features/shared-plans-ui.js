@@ -1,12 +1,12 @@
 "use strict";
 
-/* Account dialogs and the read-only shared plan views. */
+/* Account dialogs, shared plans, and invitation management. */
 const SharedPlansUI = (() => {
-  let startup, accountId, accountReady, accountAvailable;
+  let startup, accountId, accountEmail, accountReady, accountAvailable, refreshDetail;
 
   const closeButton = '<button type="button" class="btn" data-action="close-modal">Close</button>';
   const status = '<p class="shared-status" data-shared-status role="status"></p>';
-  const shareScope = "The shared copy includes dates, itinerary, saved places, and checklist, including the notes, prices, and links on individual items. It updates when you publish from this device.";
+  const shareScope = "The shared plan starts with this trip’s dates, itinerary, saved places, and checklist, including the notes, prices, and links on individual items.";
   const planHash = (id) => "#shared/" + encodeURIComponent(id);
   const modalCurrent = (root) => modal.open && root.isConnected;
   const sharedRoute = () => /^#shared(?:\/|$)/.test(location.hash);
@@ -14,11 +14,13 @@ const SharedPlansUI = (() => {
   function updateAccount() {
     const user = SharedPlans.user;
     const nextId = user?.id || null;
-    const changed = nextId !== accountId || accountReady !== SharedPlans.ready ||
+    const identityChanged = nextId !== accountId || user?.email !== accountEmail;
+    const changed = identityChanged || accountReady !== SharedPlans.ready ||
       accountAvailable !== SharedPlans.available;
-    if (nextId !== accountId && modal.open && $("[data-private-share]", modal))
+    if (identityChanged && modal.open && $("[data-private-share]", modal))
       closeModal();
     accountId = nextId;
+    accountEmail = user?.email;
     accountReady = SharedPlans.ready;
     accountAvailable = SharedPlans.available;
     const control = $("#open-account");
@@ -31,8 +33,12 @@ const SharedPlansUI = (() => {
     if (startup) return;
     $("#open-account")?.addEventListener("click", () => openAccount());
     window.addEventListener("hashchange", () => {
+      if (!sharedRoute()) refreshDetail = undefined;
       if (modal.open && $("[data-private-share]", modal)) closeModal();
     });
+    window.addEventListener("focus", () => refreshDetail?.());
+    document.addEventListener("visibilitychange", () => refreshDetail?.());
+    setInterval(() => refreshDetail?.(), 12000);
     SharedPlans.subscribe(updateAccount);
     startup = Promise.resolve()
       .then(() => SharedPlans.init())
@@ -163,6 +169,9 @@ const SharedPlansUI = (() => {
 
   const linkButton = '<button type="button" class="btn btn-small" data-copy-plan-link>Copy plan link</button>';
   const linkFallback = '<div class="shared-link-fallback" data-plan-link-fallback hidden><label>Plan link <input type="text" readonly></label></div>';
+  const inviteFields = () =>
+    field("Invite by email", "invite-email", "", "email", 'required maxlength="254" placeholder="traveler@example.com"') +
+    '<div class="form-field"><label for="field-invite-access">Access</label><select id="field-invite-access" name="access"><option value="edit">Can edit</option><option value="view">Can view</option></select></div>';
 
   async function openShare(trip) {
     if (!trip) return;
@@ -174,62 +183,53 @@ const SharedPlansUI = (() => {
       return;
     }
     const userId = SharedPlans.user.id;
-    const root = dialog("Share plan", '<p data-private-share role="status">Checking for a shared copy…</p>');
+    const root = dialog("Share plan", '<p data-private-share role="status">Checking for a shared plan…</p>');
     const marker = $("[data-private-share]", root);
     try {
-      const existing = (await SharedPlans.list()).find(
-        (plan) => plan.ownerId === userId && plan.localTripId === trip.id,
-      );
-      if (modalCurrent(marker) && location.hash === route && SharedPlans.user?.id === userId)
-        shareDialog(trip.id, existing?.id);
+      const id = await SharedPlans.findOwned(trip.id);
+      if (modalCurrent(marker) && location.hash === route && SharedPlans.user?.id === userId) {
+        if (id) sharedLinkDialog(id);
+        else shareDialog(trip.id);
+      }
     } catch (error) {
       if (modalCurrent(marker)) marker.textContent = error.message;
     }
   }
 
-  function shareDialog(tripId, id, confirmation = "") {
+  function sharedLinkDialog(id, confirmation = "") {
+    const root = dialog(
+      "Share plan",
+      `<div data-private-share class="shared-form"><p>Open the shared plan to edit it together or manage invitations.</p>
+      <div class="shared-actions">${linkButton}<a class="btn btn-small btn-primary" href="${planHash(id)}" data-manage-plan>Open shared plan</a></div>${linkFallback}${status}</div>`,
+    );
+    $("[data-shared-status]", root).textContent = confirmation;
+    linkControls(root, id);
+    $("[data-manage-plan]", root).addEventListener("click", closeModal);
+    $(confirmation ? "[data-copy-plan-link]" : "[data-manage-plan]", root)?.focus();
+  }
+
+  function shareDialog(tripId) {
     const trip = tripById(tripId);
     if (!trip) return;
     const root = dialog(
       "Share plan",
       `<div data-private-share class="shared-form"><p><strong>${esc(trip.name)}</strong></p>
-      <p>${shareScope}</p><p>Adding an invite publishes the latest version. Invitees can view it by signing in with the email you enter.</p>
-      ${field("Invite by email", "invite-email", "", "email", 'required maxlength="254" placeholder="traveler@example.com"')}
-      ${id ? `<div class="shared-actions">${linkButton}<button type="button" class="btn btn-small" data-publish-plan>Publish latest changes</button><a class="text-link" href="${planHash(id)}" data-manage-plan>Manage access</a></div>${linkFallback}` : ""}
+      <p>${shareScope}</p>${inviteFields()}
       ${status}</div>`,
       `${closeButton}<button type="submit" class="btn btn-primary">Add invite</button>`,
       "share-trip-form",
     );
     const marker = $("[data-private-share]", root);
-    $("[data-shared-status]", root).textContent = confirmation;
-    if (id) {
-      linkControls(root, id);
-      $("[data-manage-plan]", root).addEventListener("click", () => {
-        closeModal();
-        if (location.hash === planHash(id)) render(id);
-      });
-      listen(root, "[data-publish-plan]", async () => {
-        const current = tripById(tripId);
-        if (!current) throw new Error("This trip is unavailable on this device.");
-        await SharedPlans.publish(id, current);
-        if (modalCurrent(marker)) {
-          $("[data-shared-status]", root).textContent = "Latest changes published.";
-          if (sharedRoute()) render();
-        }
-      });
-    }
     listen(root, "#share-trip-form", async (form) => {
       const current = tripById(tripId);
       if (!current) throw new Error("This trip is unavailable on this device.");
-      const email = new FormData(form).get("invite-email").trim().toLowerCase();
-      const sharedId = await SharedPlans.share(current, email);
-      if (modalCurrent(marker)) {
-        shareDialog(tripId, sharedId, `Access added for ${email}. Copy the plan link and send it to them.`);
-        if (sharedRoute()) render();
-      }
+      const values = new FormData(form);
+      const email = values.get("invite-email").trim().toLowerCase();
+      const sharedId = await SharedPlans.share(current, email, values.get("access") === "edit");
+      if (modalCurrent(marker))
+        sharedLinkDialog(sharedId, `Access added for ${email}. Copy the plan link and send it to them.`);
     });
-    const focus = confirmation ? "[data-copy-plan-link]" : "#field-invite-email";
-    $(focus, root)?.focus();
+    $("#field-invite-email", root)?.focus();
   }
 
   function notice(root, title, message, action = "", label = "") {
@@ -285,28 +285,53 @@ const SharedPlansUI = (() => {
       <div class="shared-plan-hero panel"><div class="shared-plan-art">${Art.scene(t.scene)}</div>
       <div><p class="eyebrow">${ico("pin", 14)} ${esc(t.country || "Destination")}</p>
       <h2>${esc(t.name)}</h2><p>${dateRange(t)}</p>
-      <p class="muted">${owned ? "Your shared copy" : "Shared with you"}${lastUpdate ? ` · Updated ${lastUpdate}` : ""}</p></div></div>
+      <p class="muted">${owned ? "You own this plan" : entry.canEdit ? "You can edit this plan" : "View only"}${lastUpdate ? ` · Updated ${lastUpdate}` : ""}</p>
+      ${entry.canEdit ? '<div class="shared-actions"><button type="button" class="btn btn-small btn-primary" data-edit-shared-plan>Edit shared plan</button></div>' : ""}</div></div>
       ${owned ? '<section class="panel shared-section" data-shared-owner></section>' : ""}
       ${planSection("Itinerary", itinerary, "No itinerary items yet.")}
       ${planSection("Saved places", places, "No saved places yet.", "shared-places")}
       ${planSection("Checklist", checklist, "No checklist tasks yet.")}`;
+    listen(root, "[data-edit-shared-plan]", () => {
+      SharedPlanEditor.open(entry, {
+        isCurrent: current,
+        onSaved: () => render(entry.id, true),
+      });
+    });
     if (owned) ownerPanel($("[data-shared-owner]", root), entry, current);
   }
 
   function ownerPanel(panel, entry, current) {
     const localTrip = state?.trips.find((trip) => trip.id === entry.localTripId);
-    panel.innerHTML = `<h2>Manage access</h2><p>People you invite can open this plan after signing in with their invited email address.</p>
-      <div class="shared-actions">${linkButton}${localTrip ? `<button class="btn btn-small" type="button" data-open-local>Invite or publish changes</button>
-      <a class="btn btn-small" href="#planner/${esc(localTrip.id)}">Open trip planner</a>` : ""}
+    panel.innerHTML = `<h2>Manage access</h2><p>People sign in with their invited email address to open the plan.</p>
+      <div class="shared-actions"><button class="btn btn-small" type="button" data-add-invite>Add invite</button>${linkButton}
+      ${localTrip ? `<a class="text-link" href="#planner/${esc(localTrip.id)}">Open local trip</a>` : ""}
       <button class="btn btn-small danger" type="button" data-stop-sharing>Stop sharing</button></div>${linkFallback}
       <div data-invited-accounts role="group" aria-label="Invited email addresses"></div>${status}`;
     linkControls(panel, entry.id);
-    if (localTrip)
-      listen(panel, "[data-open-local]", () => openShare(tripById(localTrip.id)));
+    listen(panel, "[data-add-invite]", () => {
+      const root = dialog(
+        "Add invite",
+        `<div data-private-share class="shared-form">${inviteFields()}${status}</div>`,
+        `${closeButton}<button type="submit" class="btn btn-primary">Add invite</button>`,
+        "shared-invite-form",
+      );
+      const marker = $("[data-private-share]", root);
+      $("#field-invite-email", root)?.focus();
+      listen(root, "#shared-invite-form", async (form) => {
+        const values = new FormData(form);
+        const email = values.get("invite-email").trim().toLowerCase();
+        await SharedPlans.invite(entry.id, email, values.get("access") === "edit");
+        if (modalCurrent(marker)) closeModal();
+        if (current() && panel.isConnected) {
+          invitedAccounts(panel, entry.id, current);
+          $("[data-shared-status]", panel).textContent = `Access added for ${email}. Copy the plan link and send it to them.`;
+        }
+      });
+    });
     listen(panel, "[data-stop-sharing]", () => {
       const root = dialog(
         "Stop sharing this plan?",
-        `<div data-private-share><p>Invited accounts will lose access to this plan link.</p>${status}</div>`,
+        `<div data-private-share><p>This deletes the shared plan and its changes. Invited accounts will lose access to the link.</p>${status}</div>`,
         `${closeButton}<button type="button" class="btn danger" data-confirm-stop>Stop sharing</button>`,
       );
       const marker = $("[data-private-share]", root);
@@ -325,13 +350,29 @@ const SharedPlansUI = (() => {
     region.innerHTML = '<p role="status">Loading invites…</p>';
     try {
       const accounts = await SharedPlans.listInvites(id);
-      if (!current()) return;
+      if (!current() || !region.isConnected) return;
       region.innerHTML = accounts.length
-        ? `<ul class="shared-invites">${accounts.map((email) => `<li><span class="shared-email">${esc(email)}</span><button type="button" class="btn btn-small" aria-label="Revoke access for ${esc(email)}">Revoke access</button></li>`).join("")}</ul>`
+        ? `<ul class="shared-invites">${accounts.map(({ email, canEdit }) => `<li><div><span class="shared-email">${esc(email)}</span><p class="muted" data-invite-access>${canEdit ? "Can edit" : "Can view"}</p></div><div class="shared-actions"><button type="button" class="btn btn-small" data-change-access>${canEdit ? "Make view only" : "Allow editing"}</button><button type="button" class="btn btn-small" data-revoke-access aria-label="Revoke access for ${esc(email)}">Revoke access</button></div></li>`).join("")}</ul>`
         : "<p>No invited email addresses.</p>";
       region.querySelectorAll("li").forEach((row, index) => {
-        listen(row, "button", async () => {
-          const email = accounts[index];
+        const { email } = accounts[index];
+        let { canEdit } = accounts[index];
+        const change = $("[data-change-access]", row);
+        function labelAccess() {
+          change.textContent = canEdit ? "Make view only" : "Allow editing";
+          change.setAttribute("aria-label", `${change.textContent} for ${email}`);
+        }
+        labelAccess();
+        listen(row, "[data-change-access]", async () => {
+          await SharedPlans.setAccess(id, email, !canEdit);
+          if (current() && row.isConnected) {
+            canEdit = !canEdit;
+            $("[data-invite-access]", row).textContent = canEdit ? "Can edit" : "Can view";
+            labelAccess();
+            $("[data-shared-status]", panel).textContent = `Access updated for ${email}.`;
+          }
+        }, panel);
+        listen(row, "[data-revoke-access]", async () => {
           await SharedPlans.revoke(id, email);
           if (current() && row.isConnected) {
             row.remove();
@@ -341,7 +382,7 @@ const SharedPlansUI = (() => {
         }, panel);
       });
     } catch (error) {
-      if (current()) region.textContent = error.message;
+      if (current() && region.isConnected) region.textContent = error.message;
     }
   }
 
@@ -353,19 +394,22 @@ const SharedPlansUI = (() => {
     root.innerHTML = `<ul class="shared-plan-list">${plans.map((plan) => {
       const lastUpdate = updated(plan.updatedAt);
       return `<li class="panel shared-plan-list-item"><div><h2>${esc(plan.name)}</h2>
-        <p>${dateRange(plan)}</p><p class="muted">${plan.ownerId === userId ? "You shared this plan" : "Shared with you"}${lastUpdate ? ` · Updated ${lastUpdate}` : ""}</p></div>
+        <p>${esc(dateRange(plan))}</p><p class="muted">${plan.ownerId === userId ? "You shared this plan" : "Shared with you"}${lastUpdate ? ` · Updated ${lastUpdate}` : ""}</p></div>
         <a class="btn btn-small" href="${planHash(plan.id)}">Open plan ${ico("arrow", 13)}</a></li>`;
     }).join("")}</ul>`;
   }
 
-  async function render(id = location.hash.split("/")[1]) {
+  async function render(id = location.hash.split("/")[1], focusEditor = false) {
+    refreshDetail = undefined;
     const route = location.hash;
     main.innerHTML = `<section class="shared-view" aria-labelledby="shared-view-title">
-      <div class="section-title"><h1 id="shared-view-title">Shared plans</h1><a href="#planner" class="text-link">Trip planner ${ico("arrow", 14)}</a></div>
+      <div class="section-title"><h1 id="shared-view-title" tabindex="-1">Shared plans</h1><a href="#planner" class="text-link">Trip planner ${ico("arrow", 14)}</a></div>
       <div data-shared-view></div></section>`;
     const root = $("[data-shared-view]", main);
-    const userId = SharedPlans.user?.id;
-    const current = () => root.isConnected && location.hash === route && SharedPlans.user?.id === userId;
+    const viewer = SharedPlans.user;
+    const userId = viewer?.id;
+    const current = () => root.isConnected && location.hash === route &&
+      SharedPlans.user?.id === userId && SharedPlans.user?.email === viewer?.email;
     if (!SharedPlans.ready) {
       root.innerHTML = '<p class="loading-state" role="status">Connecting to your account…</p>';
       return;
@@ -388,10 +432,7 @@ const SharedPlansUI = (() => {
     root.innerHTML = '<p class="loading-state" role="status">Loading shared plans…</p>';
     try {
       if (id) {
-        const plan = await SharedPlans.get(id);
-        if (!current()) return;
-        if (plan) showPlan(root, plan, plan.ownerId === userId, current);
-        else notice(root, "Plan unavailable", "Ask the person who shared the plan to check the link and your invited email address.");
+        await renderDetail(root, id, userId, current, focusEditor);
       } else {
         const plans = await SharedPlans.list();
         if (current()) showList(root, plans, userId);
@@ -401,6 +442,45 @@ const SharedPlansUI = (() => {
       notice(root, "Couldn’t open shared plans", error.message, "data-retry-shared", "Try again");
       listen(root, "[data-retry-shared]", () => render(id));
     }
+  }
+
+  async function renderDetail(root, id, userId, current, focusEditor) {
+    let entry = await SharedPlans.get(id);
+    if (!current()) return;
+
+    function display(focus) {
+      if (entry) showPlan(root, entry, entry.ownerId === userId, current);
+      else notice(root, "Plan unavailable", "Ask the person who shared the plan to check the link and your invited email address.");
+      if (focus) ($("[data-edit-shared-plan]", root) || $(".back-link", root) || $("#shared-view-title", main))?.focus();
+    }
+
+    display(focusEditor);
+    if (!entry) return;
+
+    let checking = false;
+    const refreshAllowed = () => current() && !document.hidden && !modal.open &&
+      !document.activeElement?.closest("[data-shared-owner]") &&
+      !$('[data-shared-owner] [aria-busy="true"]', root);
+    refreshDetail = async () => {
+      if (checking || !refreshAllowed()) return;
+      checking = true;
+      try {
+        const latest = await SharedPlans.check(id);
+        if (!refreshAllowed()) return;
+        if (latest?.revision === entry.revision && latest?.canEdit === entry.canEdit) return;
+
+        const updatedEntry = latest ? await SharedPlans.get(id) : null;
+        if (!refreshAllowed()) return;
+        const hadFocus = root.contains(document.activeElement);
+        entry = updatedEntry;
+        if (!entry) refreshDetail = undefined;
+        display(hadFocus);
+      } catch {
+        // Keep the displayed plan during a temporary connection failure. The next check retries.
+      } finally {
+        checking = false;
+      }
+    };
   }
 
   return { start, render, openAccount, openShare };

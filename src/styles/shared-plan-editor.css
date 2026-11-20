@@ -76,6 +76,10 @@ dialog:has(#shared-plan-edit-form) {
 }
 
 .shared-edit-status:empty {
+  position: absolute;
+}
+
+#shared-plan-edit-form [data-edit-refresh][hidden] {
   display: none;
 }
 

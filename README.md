@@ -55,16 +55,18 @@ The original database name, object-store key, and backup format are preserved in
 
 ## Accounts and shared plans
 
-Open **Account** to sign in with an email code. Open a trip and choose **Share plan**, enter the recipient's email address, and send them the copied link. They can open the link or find the plan in **Account → Shared plans** after signing in with that address. Recipients can view the itinerary, saved places, their item details, and the checklist. The owner can publish updates, revoke individual invitations, or stop sharing the plan from **Shared plans**.
+Open **Account** to sign in with an email code. From a trip, choose **Share plan**, enter the recipient's email address, and choose **Can edit** or **Can view**. Send them the copied link. They can open it or find the plan in **Account → Shared plans** after signing in with that address. The owner can add people, change permissions, and revoke access under **Manage access**.
 
-Published plans are stored in Supabase and can be viewed from other browsers. Journal memories, photos, budget entries, and trip-wide notes stay in the local journal. Backups cover the local journal. To remove a published copy, open **Shared plans** and choose **Stop sharing**.
+The owner and invited editors make changes to the same shared plan in **Edit shared plan**. They can change the trip details, itinerary, saved places, and checklist. An open shared plan checks for saved changes automatically. If someone saves first, the editor keeps the older draft open so its changes can be reviewed before refreshing.
+
+The shared plan starts from a copy of the local trip and is stored in Supabase. To plan together, make changes from **Shared plans**. Journal memories, photos, budget entries, and trip-wide notes stay in the local journal, which you can export as a backup. **Stop sharing** deletes the cloud plan and its shared changes.
 
 ### Enable account sharing on a deployment
 
-1. Create or select a Supabase project and run [the shared plans migration](supabase/migrations/20261120000000_roam_shared_plans.sql) in its SQL Editor or with `supabase db push` against a linked project.
+1. Create or select a Supabase project and apply the files in [supabase/migrations](supabase/migrations) in order. A new project needs both migrations. A project with sharing already enabled needs [the editor migration](supabase/migrations/20261120000001_roam_shared_plan_editors.sql). Run the migrations in the SQL Editor or with `supabase db push` against a linked project.
 2. Enable email sign-ups, email confirmation, and **Secure email change** in Supabase Auth. In the **Confirm signup** and **Magic Link** email templates, include `{{ .Token }}` in the message so visitors receive a code. Configure custom SMTP to deliver sign-in codes to visitors outside your Supabase team. [Email templates](https://supabase.com/docs/guides/auth/auth-email-templates) · [Custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
 3. Set `ROAM_SUPABASE_URL` to the project URL and `ROAM_SUPABASE_PUBLISHABLE_KEY` to the `sb_publishable_…` key in the host's build environment. These two values are public. For local development, export the two variables in your shell before running `npm run dev`. [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys)
-4. Build and deploy the site. Once deployed, use two email addresses to confirm that an invited account can open a plan and that revoking its invitation removes access. With both variables empty, the site continues to run as a local journal.
+4. Build and deploy the site. Use two email addresses to verify that an invited editor can save changes and that switching an invitation to **Can view** removes editing access. Existing invitations keep their view-only access until the owner changes them. With both variables empty, the site continues to run as a local journal.
 
 ## Features
 

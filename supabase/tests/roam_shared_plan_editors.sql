@@ -41,6 +41,7 @@ set local request.jwt.claims = '{"sub":"a126e96e-49f7-41b7-9db1-000000000002"}';
 do $$
 declare
   shared_id uuid := current_setting('roam_test.editor_plan_id')::uuid;
+  failed_constraint text;
 begin
   assert public.edit_roam_plan(shared_id, '{"name":"Editor update"}', 1) = 2;
   assert (select plan->>'name' from public.roam_shared_plans where id = shared_id) = 'Editor update';
@@ -59,6 +60,15 @@ begin
     perform public.edit_roam_plan(shared_id, '[]', 2);
     raise exception 'An editor saved an invalid plan';
   exception when check_violation then
+    assert (select revision from public.roam_shared_plans where id = shared_id) = 2;
+  end;
+
+  begin
+    perform public.edit_roam_plan(shared_id, jsonb_build_object('name', E' \t\n '), 2);
+    raise exception 'An editor saved a plan without a destination name';
+  exception when check_violation then
+    get stacked diagnostics failed_constraint = constraint_name;
+    assert failed_constraint = 'roam_shared_plan_name';
     assert (select revision from public.roam_shared_plans where id = shared_id) = 2;
   end;
 end;
